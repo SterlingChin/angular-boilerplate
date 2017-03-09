@@ -1,38 +1,75 @@
-const gulp = require('gulp');
-const concat = require('gulp-concat');
-const babel = require('gulp-babel');
-const sass = require('gulp-sass');
+//1. Make gulpfile
+//2. npm i all dependencies
+//3. check all folder paths used in gulpfile
+//4. Update index.html
+//5. Run gulp watch
 
-// Instructions for how task will run.
-gulp.task('concat', function(){
-  // gulp.src(['./js/services/mainService.js', './js/adventurerCard.js', './js/'])       Bad way
-  // Use a wildcard instead. Wildcard = *
-  gulp.src(['./js/app.js', './js/**/*.js'])
-  .pipe(babel({
-    presets: ['es2015']
-  }))
-  .pipe(concat('all.js'))
-  .pipe(gulp.dest('./dist'));
+const gulp = require('gulp'),
+    del = require('del'),
+    sass = require('gulp-sass'),
+    sourcemaps = require('gulp-sourcemaps'),
+    uglify = require('gulp-uglify'),
+    concat = require('gulp-concat'),
+    print = require('gulp-print'),
+    babel = require('gulp-babel');
+    // Make sure to include babel-preset-es2015 in the npm installs for the build-js function to work properly.
+
+
+var CacheBuster = require('gulp-cachebust');
+var cachebust = new CacheBuster();
+
+const paths = {
+  jsSource: ['./src/components/**/*.js', './src/components/*.js'],
+  cssFiles: './src/**/*.css',
+  indexFile: './src/index.html',
+  scssFiles: './src/**/**/*.scss',
+  htmlFiles: './src/**/*.html',
+  dist: './src/dist',
+};
+
+gulp.task('build-css', function () {
+  return gulp.src([paths.scssFiles, paths.cssFiles])
+    .pipe(sourcemaps.init())
+    .pipe(sass())
+    .pipe(cachebust.resources())
+    .pipe(concat('styles.css'))
+    .pipe(gulp.dest(paths.dist));
+});
+
+gulp.task('clean', function (cb) {
+  return del([
+    'src/dist/**'
+  ], cb).then(() => {
+     return gulp.start(['build-css', 'build-js']);
+  });
+});
+
+// gulp.task('build-html', function () {
+//   return gulp.src([paths.htmlFiles, paths.indexFiles])
+//     .pipe(gulp.dest(paths.dist))
+// });
+
+
+gulp.task('build-js', function () {
+  return gulp.src(paths.jsSource)
+    .pipe(sourcemaps.init())
+    .pipe(print())
+    .pipe(babel({
+      presets: ['es2015']
+    }))
+    .pipe(concat('bundle.js'))
+    //   .pipe(uglify())
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest(paths.dist));
+});
+
+gulp.task('build', ['clean']);
+
+gulp.task('watch', function () {
+  return gulp.watch([paths.jsSource, paths.cssFiles, paths.scssFiles], ['clean']);
 });
 
 
-// Compile scss into css files
-gulp.task('sass', function() {
-  gulp.src([
-    './styles/base/reset.css', 
-    './views/**/*{.scss,.css}',
-    './styles/**/*.scss'
-    ])
-  .pipe(sass().on('error', sass.logError))
-  .pipe(concat('all.css'))
-  .pipe(gulp.dest('./dist'));
+gulp.task('default', ['clean'], () =>{
+  return gulp.start(['watch']);
 });
-
-
-gulp.task('default', ['concat', 'sass']);
-
-
-// Gulp watch
-// takes two arguments: the file(s) to watch, and then the task to do if it notices a change.
-gulp.watch('./js/**/*.js', ['concat']);
-gulp.watch('./styles/**/*.{css, scss}', ['sass']);
