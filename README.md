@@ -1,1 +1,4 @@
-# best-kiteboard-clone
+# Angular Boilerplate
+Includes:
+-gulp
+-scss
