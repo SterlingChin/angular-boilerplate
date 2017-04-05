@@ -5,14 +5,15 @@ angular.module('app', ['ui.router']).config(function ($stateProvider, $urlRouter
 
     $stateProvider.state('home', {
         url: '/',
-        templateUrl: '../views/home/home.html'
+        templateUrl: './views/home/home.html'
     }).state('page2', {
         url: '/page2',
-        templateUrl: '../views/page2/page2.html'
+        templateUrl: './views/page2/page2.html'
     }).state('page3', {
-        url: './page3',
-        templateUrl: '../views/page3/page3.html'
+        url: '/page3',
+        templateUrl: './views/page3/page3.html'
     });
+    //testing
 });
 'use strict';
 
@@ -33,7 +34,7 @@ angular.module('app').directive('mainDirective', function () {
 angular.module('app').directive('navbar', function () {
     return {
         restrict: 'E',
-        templateUrl: '../views/navbar/navbar.html'
+        templateUrl: './views/navbar/navbar.html'
     };
 });
 'use strict';
